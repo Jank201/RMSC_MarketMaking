@@ -7,8 +7,10 @@ Created on Tue Sep 24 09:35:00 2024
 
 import requests
 from time import sleep
+import pandas as pd
+from matplotlib import pyplot as plt
+import numpy as np
 
-# numpy, pandas
 
 s = requests.Session()
 s.headers.update({'X-API-key': '9V36T36G'}) # Make sure you use YOUR API Key
@@ -35,25 +37,44 @@ def get_bid_ask(ticker):
         
         bid_prices_book = [item["price"] for item in bid_side_book]
         ask_prices_book = [item['price'] for item in ask_side_book]
+        bid_quantity_book = [item["quantity"] for item in bid_side_book]
+        ask_quantity_book = [item["quantity"] for item in ask_side_book]
+        bid_id_book = [item["order_id"] for item in bid_side_book] 
+        ask_id_book = [item["order_id"] for item in ask_side_book] 
         
         best_bid_price = bid_prices_book[0]
         best_ask_price = ask_prices_book[0]
-  
-        return best_bid_price, best_ask_price
+        
+        bid_quantity = bid_quantity_book[0]
+        ask_quantity = ask_quantity_book[0]
+
+        bid_id= bid_id_book[0]
+        ask_id= ask_id_book[0]
+
+        return best_bid_price, best_ask_price, bid_quantity, ask_quantity, bid_id, ask_id
 
 def get_time_sales(ticker):
-    payload = {'ticker': ticker}
+    payload = {'ticker': ticker, 'limit': 50}
     resp = s.get ('http://localhost:9999/v1/securities/tas', params = payload)
     if resp.ok:
         book = resp.json()
         time_sales_book = [item["quantity"] for item in book]
         return time_sales_book
 
+def get_time_price(ticker):
+    payload = {'ticker': ticker, 'limit': 50}
+    resp = s.get ('http://localhost:9999/v1/securities/tas', params = payload)
+    if resp.ok:
+        book = resp.json()
+        time_sales_book = [item["price"] for item in book]
+        return time_sales_book
+
+
 def get_position():
     resp = s.get ('http://localhost:9999/v1/securities')
     if resp.ok:
         book = resp.json()
-        return (book[0]['position']) + (book[1]['position']) + (book[2]['position'])
+        return (book[0]['position']) + (book[1]['position']) + (book[2]['position']) + book[3]['position']
 
 def get_open_orders(ticker):
     payload = {'ticker': ticker}
@@ -70,27 +91,169 @@ def get_order_status(order_id):
         order = resp.json()
         return order['status']
 
+
+def check_first10(array1, array2):
+     return np.all(np.array(array1[-150:]) < np.array(array2[-150:]))
+
+def check_first10pos(array1, array2):
+     return np.all(np.array(array1[-150:]) > np.array(array2[-150:]))
+
 def main():
     tick, status = get_tick()
-    ticker_list = ['OWL','CROW','DOVE','DUCK']
+    #ticker_list = ['OWL','CROW','DOVE','DUCK']
+    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 200, 'price': 100, 'action': 'SELL'})
+    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 2100, 'price': 100, 'action': 'SELL'})
 
-    while status == 'ACTIVE':        
+    #print(get_time_price("OWL")[0])
+    #print(get_position())
 
-        for i in range(4):
-            
-            ticker_symbol = ticker_list[i]
-            position = get_position()
-            best_bid_price, best_ask_price = get_bid_ask(ticker_symbol)
-       
-            if position < MAX_LONG_EXPOSURE:
-                resp = s.post('http://localhost:9999/v1/orders', params = {'ticker': ticker_symbol, 'type': 'LIMIT', 'quantity': ORDER_LIMIT, 'price': best_bid_price, 'action': 'BUY'})
-                
-            if position > MAX_SHORT_EXPOSURE:
-                resp = s.post('http://localhost:9999/v1/orders', params = {'ticker': ticker_symbol, 'type': 'LIMIT', 'quantity': ORDER_LIMIT, 'price': best_ask_price, 'action': 'SELL'})
+    #data = list(reversed(get_time_price("CROW")))# Simulated cumulative sum data
 
-            sleep(0.75) 
+    #df = pd.DataFrame({'Actual': data})
 
-            s.post('http://localhost:9999/v1/commands/cancel', params = {'ticker': ticker_symbol})
+    # # Calculate the moving average
+    # sma = list(df['Actual'].rolling(window=10).mean())
+    # lma = list(df['Actual'].rolling(window=200).mean())
+    # df['S Moving Average'] = df['Actual'].rolling(window=50).mean()
+    # df['L Moving Average'] = df['Actual'].rolling(window=200).mean()
+    
+
+    # plt.plot(df['Actual'], label='Actual Data', color='blue', alpha=0.7)
+    # plt.plot(df['L Moving Average'], label=f'200-point Moving Average', color='red', linewidth=2)
+    # plt.plot(df['S Moving Average'], label=f'50-point Moving Average', color='green', linewidth=2)
+    # plt.title('Actual Data vs. Moving Average')
+    # plt.xlabel('Index')
+    # plt.ylabel('Value')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+
+    long_positionCrow = 0
+    short_positionCrow = 0
+
+    long_positionDove = 0
+    short_positionDove = 0
+
+    long_positionDuck = 0
+    short_positionDuck = 0
+
+    long_positionOwl = 0
+    short_positionOwl = 0
+
+    while status == 'ACTIVE':       
+
+
+        dataCrow = list(reversed(get_time_price("CROW")))
+        dataDuck = list(reversed(get_time_price("DUCK")))
+        dataDove = list(reversed(get_time_price("DOVE")))
+        dataOwl = list(reversed(get_time_price("OWL")))
+
+        dfCrow = pd.DataFrame({'Actual': dataCrow})
+        dfDove = pd.DataFrame({'Actual': dataDove})
+        dfDuck = pd.DataFrame({'Actual': dataDuck})
+        dfOwl = pd.DataFrame({'Actual': dataOwl})
+
+        smaCrow = list(dfCrow['Actual'].rolling(window=50).mean())
+        lmaCrow = list(dfCrow['Actual'].rolling(window=200).mean())
+
+        smaDove = list(dfDove['Actual'].rolling(window=50).mean())
+        lmaDove = list(dfDove['Actual'].rolling(window=200).mean())
+
+        smaDuck = list(dfDuck['Actual'].rolling(window=50).mean())
+        lmaDuck = list(dfDuck['Actual'].rolling(window=200).mean())
+
+        smaOwl = list(dfOwl['Actual'].rolling(window=50).mean())
+        lmaOwl = list(dfOwl['Actual'].rolling(window=200).mean())
+
+ 
+        if ((short_positionCrow == 0) and (check_first10(smaCrow,lmaCrow))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
+            print("CROW SHORT POSITION")
+            short_positionCrow = 1
+        
+        
+        if (short_positionCrow == 1) and smaCrow[-1] > lmaCrow[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("CROW EXIT SHORT POSITION")
+            short_positionCrow = 0
+      
+
+        if ((long_positionCrow == 0) and (check_first10pos(smaCrow,lmaCrow))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("CROW LONG POSITION")
+            long_positionCrow = 1
+        
+ 
+        if (long_positionCrow == 1) and smaCrow[-1] < lmaCrow[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
+            print("CROW EXIT LONG POSITION")
+            long_positionCrow = 0
+    
+        if ((short_positionDove == 0) and (check_first10(smaDove,lmaDove))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
+            print("DOVE SHORT POSITION")
+            short_positionDove = 1
+   
+        if (short_positionDove == 1) and smaDove[-1] > lmaDove[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("DOVE EXIT SHORT POSITION")
+            short_positionDove = 0
+    
+        if ((long_positionDove == 0) and (check_first10pos(smaDove,lmaDove))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("DOVE LONG POSITION")
+            long_positionDove = 1
+  
+        if (long_positionDove == 1) and smaDove[-1] < lmaDove[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
+            print("DOVE EXIT LONG POSITION")
+            long_positionDove = 0
+        
+        
+        if ((short_positionDuck == 0) and (check_first10(smaDuck,lmaDuck))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
+            print("Duck SHORT POSITION")
+            short_positionDuck = 1
+        
+        
+        if (short_positionDuck == 1) and smaDuck[-1] > lmaDuck[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("Duck EXIT SHORT POSITION")
+            short_positionDuck = 0
+      
+
+        if ((long_positionDuck == 0) and (check_first10pos(smaDuck,lmaDuck))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("Duck LONG POSITION")
+            long_positionDuck = 1
+        
+ 
+        if (long_positionDuck == 1) and smaDuck[-1] < lmaDuck[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
+            print("Duck EXIT LONG POSITION")
+            long_positionDuck = 0
+    
+        if ((short_positionOwl == 0) and (check_first10(smaOwl,lmaOwl))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
+            print("Owl SHORT POSITION")
+            short_positionOwl = 1
+   
+        if (short_positionOwl == 1) and smaOwl[-1] > lmaOwl[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("Owl EXIT SHORT POSITION")
+            short_positionOwl = 0
+    
+        if ((long_positionOwl == 0) and (check_first10pos(smaOwl,lmaOwl))):
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            print("Owl LONG POSITION")
+            long_positionOwl = 1
+  
+        if (long_positionOwl == 1) and smaOwl[-1] < lmaOwl[-1]:
+            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
+            print("Owl EXIT LONG POSITION")
+            long_positionOwl = 0
+ 
+
 
         tick, status = get_tick()
 
