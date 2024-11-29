@@ -93,23 +93,27 @@ def get_order_status(order_id):
 
 
 def check_first10(array1, array2):
-     return np.all(np.array(array1[-150:]) < np.array(array2[-150:]))
+     return np.all(np.array(array1[-250:]) < np.array(array2[-250:]))
 
 def check_first10pos(array1, array2):
-     return np.all(np.array(array1[-150:]) > np.array(array2[-150:]))
+     return np.all(np.array(array1[-250:]) > np.array(array2[-250:]))
 
 def main():
     tick, status = get_tick()
+    #for i in range(0,96):
+    #        s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
     #ticker_list = ['OWL','CROW','DOVE','DUCK']
-    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 200, 'price': 100, 'action': 'SELL'})
-    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 2100, 'price': 100, 'action': 'SELL'})
+    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000, 'price': 100, 'action': 'SELL'})
+    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000, 'price': 100, 'action': 'SELL'})
+    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000, 'price': 100, 'action': 'SELL'})
+    #s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000, 'price': 100, 'action': 'BUY'})
 
     #print(get_time_price("OWL")[0])
     #print(get_position())
 
-    #data = list(reversed(get_time_price("CROW")))# Simulated cumulative sum data
+    # data = list(reversed(get_time_price("CROW")))# Simulated cumulative sum data
 
-    #df = pd.DataFrame({'Actual': data})
+    # df = pd.DataFrame({'Actual': data})
 
     # # Calculate the moving average
     # sma = list(df['Actual'].rolling(window=10).mean())
@@ -142,7 +146,6 @@ def main():
 
     while status == 'ACTIVE':       
 
-
         dataCrow = list(reversed(get_time_price("CROW")))
         dataDuck = list(reversed(get_time_price("DUCK")))
         dataDove = list(reversed(get_time_price("DOVE")))
@@ -167,90 +170,80 @@ def main():
 
  
         if ((short_positionCrow == 0) and (check_first10(smaCrow,lmaCrow))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
+            for i in range(0,25):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
             print("CROW SHORT POSITION")
             short_positionCrow = 1
-        
-        
         if (short_positionCrow == 1) and smaCrow[-1] > lmaCrow[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            for i in range(0,25):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             print("CROW EXIT SHORT POSITION")
             short_positionCrow = 0
-      
-
         if ((long_positionCrow == 0) and (check_first10pos(smaCrow,lmaCrow))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("CROW LONG POSITION")
+            for i in range(0,25):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             long_positionCrow = 1
-        
- 
         if (long_positionCrow == 1) and smaCrow[-1] < lmaCrow[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
-            print("CROW EXIT LONG POSITION")
+            for i in range(0,25):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
             long_positionCrow = 0
     
+
+
+
+
         if ((short_positionDove == 0) and (check_first10(smaDove,lmaDove))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
-            print("DOVE SHORT POSITION")
+            for i in range(0,7):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
             short_positionDove = 1
-   
         if (short_positionDove == 1) and smaDove[-1] > lmaDove[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("DOVE EXIT SHORT POSITION")
+            for i in range(0,7):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             short_positionDove = 0
-    
         if ((long_positionDove == 0) and (check_first10pos(smaDove,lmaDove))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("DOVE LONG POSITION")
+            for i in range(0,7):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             long_positionDove = 1
-  
         if (long_positionDove == 1) and smaDove[-1] < lmaDove[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
-            print("DOVE EXIT LONG POSITION")
+            for i in range(0,7):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DOVE', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
             long_positionDove = 0
         
         
-        if ((short_positionDuck == 0) and (check_first10(smaDuck,lmaDuck))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
-            print("Duck SHORT POSITION")
-            short_positionDuck = 1
-        
-        
-        if (short_positionDuck == 1) and smaDuck[-1] > lmaDuck[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("Duck EXIT SHORT POSITION")
-            short_positionDuck = 0
-      
 
+        if ((short_positionDuck == 0) and (check_first10(smaDuck,lmaDuck))):
+            for i in range(0,10):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
+            short_positionDuck = 1  
+        if (short_positionDuck == 1) and smaDuck[-1] > lmaDuck[-1]:
+            for i in range(0,10):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
+            short_positionDuck = 0
         if ((long_positionDuck == 0) and (check_first10pos(smaDuck,lmaDuck))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("Duck LONG POSITION")
+            for i in range(0,10):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             long_positionDuck = 1
-        
- 
         if (long_positionDuck == 1) and smaDuck[-1] < lmaDuck[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
-            print("Duck EXIT LONG POSITION")
+            for i in range(0,10):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'DUCK', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
             long_positionDuck = 0
     
+
         if ((short_positionOwl == 0) and (check_first10(smaOwl,lmaOwl))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
-            print("Owl SHORT POSITION")
+            for i in range(0,5):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
             short_positionOwl = 1
-   
         if (short_positionOwl == 1) and smaOwl[-1] > lmaOwl[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("Owl EXIT SHORT POSITION")
+            for i in range(0,5):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             short_positionOwl = 0
-    
         if ((long_positionOwl == 0) and (check_first10pos(smaOwl,lmaOwl))):
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("Owl LONG POSITION")
+            for i in range(0,5):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             long_positionOwl = 1
-  
         if (long_positionOwl == 1) and smaOwl[-1] < lmaOwl[-1]:
-            s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
-            print("Owl EXIT LONG POSITION")
+            for i in range(0,5):
+                s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
             long_positionOwl = 0
  
 
