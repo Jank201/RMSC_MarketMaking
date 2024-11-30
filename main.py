@@ -170,27 +170,22 @@ def main():
 
  
         if ((short_positionCrow == 0) and (check_first10(smaCrow,lmaCrow))):
-            for i in range(0,25):
+            for i in range(0,26):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
-            print("CROW SHORT POSITION")
             short_positionCrow = 1
         if (short_positionCrow == 1) and smaCrow[-1] > lmaCrow[-1]:
-            for i in range(0,25):
+            for i in range(0,26):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
-            print("CROW EXIT SHORT POSITION")
             short_positionCrow = 0
         if ((long_positionCrow == 0) and (check_first10pos(smaCrow,lmaCrow))):
-            for i in range(0,25):
+            for i in range(0,26):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             long_positionCrow = 1
         if (long_positionCrow == 1) and smaCrow[-1] < lmaCrow[-1]:
-            for i in range(0,25):
+            for i in range(0,26):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'CROW', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
             long_positionCrow = 0
     
-
-
-
 
         if ((short_positionDove == 0) and (check_first10(smaDove,lmaDove))):
             for i in range(0,7):
@@ -230,19 +225,19 @@ def main():
     
 
         if ((short_positionOwl == 0) and (check_first10(smaOwl,lmaOwl))):
-            for i in range(0,5):
+            for i in range(0,7):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000, 'action': 'SELL'})
             short_positionOwl = 1
         if (short_positionOwl == 1) and smaOwl[-1] > lmaOwl[-1]:
-            for i in range(0,5):
+            for i in range(0,7):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             short_positionOwl = 0
         if ((long_positionOwl == 0) and (check_first10pos(smaOwl,lmaOwl))):
-            for i in range(0,5):
+            for i in range(0,7):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'BUY'})
             long_positionOwl = 1
         if (long_positionOwl == 1) and smaOwl[-1] < lmaOwl[-1]:
-            for i in range(0,5):
+            for i in range(0,7):
                 s.post('http://localhost:9999/v1/orders', params = {'ticker': 'OWL', 'type': 'MARKET', 'quantity': 5000,'action': 'SELL'})
             long_positionOwl = 0
  
